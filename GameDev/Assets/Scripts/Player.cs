@@ -4,50 +4,51 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private Rigidbody rigidibodyC;
-    private bool jumpKey;
-    private float horizontalInput;
-    private float verticalInput;
-    [SerializeField] private Transform groundcheck = null;
-    [SerializeField] private LayerMask playerMask;
 
+    public Transform cam;
+    public CharacterController controller;
+    public float speed = 6f;
+    public float turnSmoothTime = 0.1f;
+    private float turnSmoothVelocity;
+    private bool jumpKey;
 
     // Start is called before the first frame update
     void Start()
     {
-        rigidibodyC = GetComponent<Rigidbody>();
+   
     }
 
     // Update is called once per frame
     void Update()
     {
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            jumpKey = true;        
+            jumpKey = true;
         }
 
-        verticalInput = Input.GetAxis("Vertical");
-        horizontalInput = Input.GetAxis("Horizontal");
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
+        if (direction.magnitude >= 0.1f)
+        {
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+            transform.rotation = Quaternion.Euler(0f, angle, 0f);
+
+            Vector3 movedirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            controller.Move(movedirection.normalized * speed * Time.deltaTime);
+        }
     }
 
     private void FixedUpdate()
     {
-        rigidibodyC.velocity = new Vector3(horizontalInput * 4, rigidibodyC.velocity.y, rigidibodyC.velocity.z);
-        rigidibodyC.velocity = new Vector3(rigidibodyC.velocity.x, rigidibodyC.velocity.y, verticalInput * 4);
-
-        if (Physics.OverlapSphere(groundcheck.position, 0.1f, playerMask).Length == 0)
-        {
-            return;
-        }
-
 
         if (jumpKey)
-        {
-            rigidibodyC.AddForce(Vector3.up * 5, ForceMode.VelocityChange);
-            jumpKey = false;
+        { 
+            
         }
-
 
     }
 
