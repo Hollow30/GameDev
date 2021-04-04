@@ -8,6 +8,9 @@ public class Player : MonoBehaviour
     private bool jumpKey;
     private float horizontalInput;
     private float verticalInput;
+    [SerializeField] private Transform groundcheck = null;
+    [SerializeField] private LayerMask playerMask;
+
 
     // Start is called before the first frame update
     void Start()
@@ -32,6 +35,11 @@ public class Player : MonoBehaviour
     {
         rigidibodyC.velocity = new Vector3(horizontalInput * 4, rigidibodyC.velocity.y, rigidibodyC.velocity.z);
         rigidibodyC.velocity = new Vector3(rigidibodyC.velocity.x, rigidibodyC.velocity.y, verticalInput * 4);
+
+        if (Physics.OverlapSphere(groundcheck.position, 0.1f, playerMask).Length == 0)
+        {
+            return;
+        }
 
 
         if (jumpKey)
